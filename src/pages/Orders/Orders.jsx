@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { assets } from "../../assets/assets";
+import { fetchAllOrders, updateOrderStatus } from "../../services/orderService";
+import { toast } from "react-toastify";
 
 const Orders = () => {
   const [data, setData] = useState([]);
 
   const fetchOrders = async () => {
-    const response = await axios.get("http://localhost:8080/api/orders/all");
-    setData(response.data);
+    try {
+      const response = await fetchAllOrders();
+      setData(response);
+    } catch (error) {
+      toast.error("Unable to display the orders. Please try again.");
+    }
   };
 
   const updateStatus = async (event, orderId) => {
-    const response = await axios.patch(
-      `http://localhost:8080/api/orders/status/${orderId}?status=${event.target.value}`
-    );
-    if (response.status === 200) {
-      await fetchOrders();
-    }
+    const success = await updateOrderStatus(orderId, event.target.value);
+    if (success) await fetchOrders();
   };
 
   useEffect(() => {
